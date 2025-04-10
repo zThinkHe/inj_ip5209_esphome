@@ -55,7 +55,7 @@ CONFIG_SCHEMA = (
             ),
             cv.Optional(CONF_CURRENT): sensor.sensor_schema(
                 unit_of_measurement=UNIT_MILLIAMP,
-                accuracy_decimals=4,
+                accuracy_decimals=0,
                 device_class=DEVICE_CLASS_CURRENT,
                 state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_DIAGNOSTIC,

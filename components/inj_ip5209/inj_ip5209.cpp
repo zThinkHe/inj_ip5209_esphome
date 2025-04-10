@@ -49,6 +49,8 @@ namespace esphome {
         // update
         void InjIP5209::update() {
             float voltage_level = NAN;
+            float voltage = NAN;
+            float current = NAN;
             float voltage = get_battery_oc_voltage();
             if (!gpio_get_level(this->irq_pin_)) {
                 ESP_LOGD(TAG, "device was not ready!");
@@ -58,7 +60,8 @@ namespace esphome {
                 initialize();
             }
 
-            voltage_level = get_battery_level();
+            voltage = get_battery_oc_voltage();
+            voltage_level = get_battery_level(voltage);
             if (voltage_level < 0) {
                 ESP_LOGE(TAG, "get wrong voltage level value: %f", voltage_level);
             }
@@ -66,8 +69,12 @@ namespace esphome {
                 this->battery_level_sensor_->publish_state(voltage_level);
             }
 
+            if (this->battery_voltage_sensor_) {
+                this->battery_voltage_sensor_->publish_state(voltage);
+            }
+
             if (this->battery_current_sensor_) {
-                float current = get_battery_current();
+                current = get_battery_current();
                 if (current < 0) {
                     ESP_LOGE(TAG, "get wrong current value: %f", current);
                 } else {
@@ -128,9 +135,6 @@ namespace esphome {
                         voltage = 2600.0f + (batOcVadc * 0.26855f); // 单位：mV
                         voltage = voltage / 1000.0f; // 转换为V
                     }
-                    if (this->battery_voltage_sensor_) {
-                        this->battery_voltage_sensor_->publish_state(voltage);
-                    }
                 } else {
                     ESP_LOGD(TAG, "Fail to read voltage value high!");
                 }
@@ -142,9 +146,8 @@ namespace esphome {
         }
 
         // 读取开路电压值并转换成level
-        float InjIP5209::get_battery_level() {
+        float InjIP5209::get_battery_level(float voltage) {
             float voltage_level = -1.0;
-            float voltage = get_battery_oc_voltage();
 
             if (voltage >= 4.2) {
                 voltage_level = 100.0f;
@@ -200,7 +203,7 @@ namespace esphome {
         }
 
         float InjIP5209::get_setup_priority() const {
-            return setup_priority::BUS;
+            return setup_priority::DATA;
         }
 
     }

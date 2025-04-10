@@ -50,7 +50,7 @@ namespace esphome {
                 esphome::i2c::ErrorCode set_disable_auto_poweroff(bool disableAutoPowerOff); 
                 esphome::i2c::ErrorCode set_charge_current(uint8_t chage_current) ; 
                 float get_battery_oc_voltage();
-                float get_battery_level();
+                float get_battery_level(float voltage);
                 float get_battery_current();
                                
             protected:

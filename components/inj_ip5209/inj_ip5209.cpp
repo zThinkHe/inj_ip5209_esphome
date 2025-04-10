@@ -51,7 +51,7 @@ namespace esphome {
             float voltage_level = NAN;
             float voltage = NAN;
             float current = NAN;
-            float voltage = get_battery_oc_voltage();
+            
             if (!gpio_get_level(this->irq_pin_)) {
                 ESP_LOGD(TAG, "device was not ready!");
                 return;

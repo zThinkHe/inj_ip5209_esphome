@@ -1,19 +1,14 @@
 esphome:
-  name: esp32s3_sensors
-  friendly_name: ESP32S3 Test
-  name_add_mac_suffix: false
-  # # This will allow for (future) project identification,
-  # # configuration and updates.
-  # project:
-  #   name: esphome.project-template
-  #   version: "1.0"
+  name: zthink-sensors
+  name_add_mac_suffix: true
+  friendly_name: "zThink Sensors"
 
 esp32:
-  board: esp32-s3-devkitm-1
-  variant: esp32s3
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
   framework:
     type: esp-idf
-    
+
 external_components:
   - source:
       type: git
@@ -24,14 +19,6 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   fast_connect: true
-  # Set up a wifi access point
-  ap:
-    password: "12345678"
-
-# In combination with the `ap` this allows the user
-# to provision wifi credentials to the device.
-captive_portal:
-
 
 api:
   reboot_timeout: 0s
@@ -41,15 +28,15 @@ ota:
 
 web_server:
   port: 80
-  # js_include: "./v2/www.js"
-  # js_url: ""
-  version: 3
+  js_include: "./v2/www.js"
+  js_url: ""
+  version: 2
 
 logger:
-  hardware_uart: UART0
-  # hardware_uart: USB_SERIAL_JTAG
+  # hardware_uart: UART0
+  hardware_uart: USB_SERIAL_JTAG
   baud_rate: 115200
-  level: VERBOSE
+  level: DEBUG
 
 mqtt:
   broker: !secret mqtt_broker
@@ -63,7 +50,6 @@ mqtt:
   discover_ip: true
   keepalive: 60s
   # topic_prefix: "homeassistant/living_room/sensors"
-  discovery_unique_id_generator: mac
   discovery_prefix: "homeassistant"
   birth_message:
     topic: null
@@ -75,23 +61,38 @@ mqtt:
   certificate_authority: !secret ssl_ca
 
 
-# 配置I2C总线
-i2c:
-  - id: bus_a
-    scl: GPIO13
-    sda: GPIO12
-    scan: true
-    frequency: 400kHz
-    # timeout: 1ms
-
 text_sensor:
   - platform: version
     name: "ESPHome Version"
+    
+# 配置I2C总线
+i2c:
+  - id: bus_a
+    scl: GPIO3
+    sda: GPIO4
+    scan: false
+    frequency: 400kHz
+    sda_pullup_enabled: false
+    scl_pullup_enabled: false
+    # timeout: 1ms
 
 sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 10s
+
+  - platform: dht
+    pin: GPIO7
+    temperature:
+      name: "Temperature"
+    humidity:
+      name: "Humidity"
+    update_interval: 10s
+
+  # 配置传感器以读取IP5209的数据
   - platform: inj_ip5209
     i2c_id: bus_a
-    irq_pin: GPIO7
+    irq_pin: GPIO5
     id: ip5209
     disable_auto_poweroff: true
     charge_current: 5
@@ -102,3 +103,12 @@ sensor:
     current:
       name: "Battery Current"
     update_interval: 10s
+
+# 配置深度睡眠模式
+deep_sleep:
+  run_duration:
+    default: 0s
+    gpio_wakeup_reason: 10min
+  sleep_duration: 55s
+  wakeup_pin: GPIO2
+  wakeup_pin_mode: KEEP_AWAKE

@@ -51,6 +51,7 @@ mqtt:
   keepalive: 60s
   # topic_prefix: "homeassistant/living_room/sensors"
   discovery_prefix: "homeassistant"
+  discovery_unique_id_generator: mac
   birth_message:
     topic: null
     payload: online
